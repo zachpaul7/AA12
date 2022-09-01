@@ -1,2 +1,2 @@
 console.log('Hello Arduino Advanced!')
-console.log('aa12, 박신영')
+console.log('aa12, RedWoods, 박신영')

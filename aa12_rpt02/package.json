@@ -1,0 +1,18 @@
+{
+  "name": "start",
+  "version": "1.0.0",
+  "description": "start node project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exot 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "aa12",
+  "license": "MIT",
+  "dependencies": {
+    "formidable": "^2.0.1"
+  }
+}

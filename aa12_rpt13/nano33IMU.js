@@ -1,7 +1,7 @@
 // db33rgb.js
 
 var serialport = require('serialport');
-var portName = 'COM3';  // check your COM port!!
+var portName = 'COM11';  // check your COM port!!
 var port    =   process.env.PORT || 3000;  // port for DB
 
 var io = require('socket.io').listen(port);
@@ -11,7 +11,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // MongoDB connection
-mongoose.connect("mongodb://localhost:27017/iot33imu", {
+mongoose.connect("mongodb://localhost:27017/iot34", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -24,23 +24,24 @@ db.once('open', function callback () {
 // Schema
 var iotSchema = new Schema({
     date : String,
-    accelerometerx : String,
-    accelerometery : String,
-    accelerometerz : String,
-    gyroscopex : String,
-    gyroscopey : String,
-    gyroscopez : String,
-    magneticx : String,
-    magneticy : String,
-    magneticz : String
+    accel_x : String,
+    accel_y : String,
+    accel_z : String,
+    gyro_x : String,
+    gyro_y : String,
+    gyro_z : String,
+    mag_x : String,
+    mag_y : String,
+    mag_z : String
+
+    
 });
 // Display data on console in the case of saving data.
 iotSchema.methods.info = function () {
     var iotInfo = this.date
-    ? "Current date: " + this.date +", Acelerox: " + this.accelerometerx + ", Aceleroy: " 
-    + this.accelerometery + ", Aceleroz: " + this.accelerometerz + ", gyrox: " + this.gyroscopex  
-    + ", gyroy: " + this.gyroscopey + ", gyroz: " + this.gyroscopez + ", magneticx: " + this.magneticx 
-    + ", magneticy: " + this.magneticy + ", magneticz: " + this.magneticz
+    ? "Current date: " + this.date +", accel_x : " + this.accel_x + ", accel_y : "+this.accel_y + ", accel_z : "+this.accel_z
+    + ", gyro_x : " + this.gyro_x + ", gyro_y : " + this.gyro_y + ", gyro_z : " + this.gyro_z  
+    + ", mag_x : " + this.mag_x + ", mag_y : " + this.mag_y + ", mag_z : " + this.mag_z
     : "I don't have a date"
     console.log("iotInfo: " + iotInfo);
 }
@@ -68,15 +69,15 @@ const parser = sp.pipe(new Readline({ delimiter: "\r\n" }));
 //   });
 
 var readData = '';  // this stores the buffer
-var accelerox = '';
-var acceleroy = '';
-var acceleroz = '';
-var gyrox = '';
-var gyroy = '';
-var gyroz = '';
-var magnetx = '';
-var magnety = '';
-var magnetz = '';
+var ax = '';
+var ay = '';
+var az = '';
+var gx = '';
+var gy = '';
+var gz = '';
+var mx = '';
+var my = '';
+var mz = '';
 
 var mdata =[]; // this array stores date and data from multiple sensors
 var firstcommaidx = 0;
@@ -85,9 +86,9 @@ var thirdcommaidx = 0;
 var fourthcommaidx = 0;
 var fifthcommaidx = 0;
 var sixthcommaidx = 0;
-var seventhcommaidx = 0;
-var eighthcommaidx = 0;
-
+var sevencommaidx = 0;
+var eightcommaidx = 0;
+ 
 var Sensor = mongoose.model("Sensor", iotSchema);  // sensor data model
 
 // process data using parser
@@ -99,39 +100,39 @@ parser.on('data', (data) => { // call back when data is received
     fourthcommaidx = readData.indexOf(',',thirdcommaidx+1);
     fifthcommaidx = readData.indexOf(',',fourthcommaidx+1);
     sixthcommaidx = readData.indexOf(',',fifthcommaidx+1);
-    seventhcommaidx = readData.indexOf(',',sixthcommaidx+1);
-    eighthcommaidx = readData.indexOf(',',seventhcommaidx+1);
+    sevencommaidx = readData.indexOf(',',sixthcommaidx+1);
+    eightcommaidx = readData.indexOf(',',sevencommaidx+1);
 
     // parsing data into signals
     if (readData.lastIndexOf(',') > firstcommaidx && firstcommaidx > 0) {
-        accelerox = readData.substring(firstcommaidx + 1, secondcommaidx);
-        acceleroy = readData.substring(secondcommaidx + 1, thirdcommaidx);
-        acceleroz = readData.substring(thirdcommaidx + 1, fourthcommaidx);
-        gyrox = readData.substring(fourthcommaidx + 1, fifthcommaidx);
-        gyroy = readData.substring(fifthcommaidx + 1, sixthcommaidx);
-        gyroz = readData.substring(sixthcommaidx + 1, seventhcommaidx);
-        magnetx = readData.substring(seventhcommaidx + 1, eighthcommaidx);
-        magnety = readData.substring(eighthcommaidx + 1, readData.indexOf(',',eighthcommaidx+1));
-        magnetz = readData.substring(readData.lastIndexOf(',')+1);
+        ax = readData.substring (0,firstcommaidx);
+        ay = readData.substring(firstcommaidx + 1, secondcommaidx);
+        az = readData.substring(secondcommaidx + 1, thirdcommaidx);
+        gx = readData.substring(thirdcommaidx + 1, fourthcommaidx);
+        gy = readData.substring(fourthcommaidx + 1,fifthcommaidx);
+        gz = readData.substring(fifthcommaidx+ 1,sixthcommaidx);
+        mx = readData.substring(sixthcommaidx+ 1,sevencommaidx);
+        my = readData.substring(sevencommaidx+ 1,readData.lastIndexOf(',',eightcommaidx));
+        mz = readData.substring(readData.lastIndexOf(',')+1);
+
         
         readData = '';
         
         dStr = getDateString();
         mdata[0]=dStr;    // Date
-        mdata[1]=accelerox;    // temperature data
-        mdata[2]=acceleroy;    // humidity data
-        mdata[3]=acceleroz;     //  luminosity data
-        mdata[4]=gyrox;    // pressure data
-        mdata[5]=gyroy;       // r_ratio
-        mdata[6]=gyroz;       // g_ratio
-        mdata[7]=magnetx;       // b_ratio
-        mdata[8]=magnety;
-        mdata[9]=magnetz;
-        
+        mdata[1]=ax;    // temperature data
+        mdata[2]=ay;    // humidity data
+        mdata[3]=az;     //  luminosity data
+        mdata[4]=gx;    // pressure data
+        mdata[5]=gy;       // r_ratio
+        mdata[6]=gz;       // g_ratio
+        mdata[7]=mx;       // b_ratio
+        mdata[8]=my;
+        mdata[9]=mz;
         //console.log(mdata);
-        var iotData = new Sensor({date:dStr, accelerometerx:accelerox, accelerometery:acceleroy, accelerometerz:acceleroy, 
-            gyroscopex:gyrox, gyroscopey:gyroy, gyroscopez:gyroz, 
-            magneticx:magnetx, magneticy:magnety, magneticz:magnetz});
+        var iotData = new Sensor({date:dStr, accel_x:ax, accel_y:ay, accel_z:az,
+            gyro_x:gx, gyro_y:gy, gyro_z:gz,
+            mag_x:mx, mag_y:my, mag_z:mz});
         // save iot data to MongoDB
         iotData.save(function(err,data) {
             if(err) return handleEvent(err);
